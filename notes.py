@@ -53,11 +53,22 @@ def add(title, content):
             new_note.write(content)
 
 
+def list_files(startpath, print_files=True):
+    for root, dirs, files in os.walk(startpath):
+        level = root.replace(startpath, '').count(os.sep)
+        heading = '#' * level
+        if level == 1:
+            print("")
+        print('{} {}'.format(heading, os.path.basename(root)))
+        subindent = ' ' * (level + 1)
+        if print_files:
+            for f in files:
+                print('{}{}'.format(subindent, f))
+
+
 @click.command()
-def list():
-    for root, dirs, files in os.walk(BASE_PATH, topdown=False):
-        for name in dirs:
-            click.echo(os.path.join(root, name))
+def struct():
+    list_files(BASE_PATH, print_files=True)
 
 
 @click.command()
@@ -84,7 +95,7 @@ cli.add_command(init)
 cli.add_command(clear)
 cli.add_command(add)
 cli.add_command(edit)
-cli.add_command(list)
+cli.add_command(struct)
 cli.add_command(search)
 
 if __name__ == '__main__':
