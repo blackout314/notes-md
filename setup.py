@@ -1,14 +1,16 @@
 from setuptools import setup
 
 setup(
-        name='notes-txt',
+        name='notes-md',
         version='0.1',
         py_modules=['new_file'],
         install_requires=[
             'Click',
+            'colorama',
+            'slugify'
             ],
         entry_points='''
             [console_scripts]
-            notes=notes:cli
+            note=notes:cli
         ''',
 )
