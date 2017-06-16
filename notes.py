@@ -19,6 +19,8 @@ def init():
     if not os.path.exists(BASE_PATH):
         os.makedirs(BASE_PATH)
 
+    # TODO: prompt for Title and author (see pandoc format)
+
 
 @click.command()
 @click.confirmation_option(help='All your notes will be erased. Are you sure you want to continue?')
