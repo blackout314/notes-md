@@ -32,26 +32,30 @@ def clear():
 
 @click.command()
 @click.argument('title')
-def add(title):
+@click.argument('content', default="")
+def add(title, content):
     if not os.path.exists(BASE_PATH):
         click.echo('Not initialized. Please run "notes init" to initialize.')
         exit()
 
     file_name = "%s.md" % datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-    msg = click.edit(title)
+    title_path = os.path.join(BASE_PATH, title)
+    note_file = os.path.join(title_path, file_name)
 
-    if msg:
-        os.makedirs(os.path.join(BASE_PATH, title))
-        with click.open_file(os.path.join(BASE_PATH, title, file_name), "w") as new_note:
-            new_note.write(title)
+    if not content:
+        content = click.edit()
+
+    if content:
+        if not os.path.exists(title_path):
+            os.makedirs(title_path)
+        with click.open_file(note_file, "a") as new_note:
+            new_note.write(content)
 
 
 @click.command()
 def list():
     for root, dirs, files in os.walk(BASE_PATH, topdown=False):
-        for name in files:
-            click.echo(os.path.join(root, name))
         for name in dirs:
             click.echo(os.path.join(root, name))
 
