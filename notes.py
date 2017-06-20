@@ -19,7 +19,7 @@ def init():
     if not os.path.exists(BASE_PATH):
         os.makedirs(BASE_PATH)
 
-    # TODO: prompt for Title and author (see pandoc format)
+        # TODO: prompt for Title and author (see pandoc format)
 
 
 @click.command()
@@ -40,7 +40,9 @@ def add(title, content):
         click.echo('Not initialized. Please run "notes init" to initialize.')
         exit()
 
-    file_name = "%s.md" % datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    # file_name = "%s.md" % datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    # file_name = "{}.md".format('page')
+    file_name = 'page.md'
 
     title_path = os.path.join(BASE_PATH, title)
     note_file = os.path.join(title_path, file_name)
@@ -52,7 +54,7 @@ def add(title, content):
         if not os.path.exists(title_path):
             os.makedirs(title_path)
         with click.open_file(note_file, "a") as new_note:
-            new_note.write(content)
+            new_note.write("\n{}\n".format(content))
 
 
 def list_files(startpath, print_files=True):
@@ -74,9 +76,11 @@ def struct():
 
 
 @click.command()
-@click.argument('file')
-def edit():
-    click.edit(filename='.notes/1/2/3/ciao2.md')
+@click.argument('title')
+def edit(title):
+    note_path = os.path.join(BASE_PATH, title, "page.md")
+    if os.path.exists(note_path):
+        click.edit(filename=note_path)
 
 
 @click.command()
@@ -88,7 +92,7 @@ def search(content):
             search_file = open(abs_path, "r")
             for line in search_file:
                 if content in line:
-                    click.echo(Fore.MAGENTA + "/".join(abs_path.split('/')[1:]) + ": " +
+                    click.echo(Fore.MAGENTA + "/".join(abs_path.split('/')[1:-1]) + ": " +
                                Fore.RESET + line.strip())
             search_file.close()
 
