@@ -16,10 +16,21 @@ def cli():
 
 @click.command()
 def init():
+    """Initialize the notes folder."""
     if not os.path.exists(BASE_PATH):
         os.makedirs(BASE_PATH)
 
-        # TODO: prompt for Title and author (see pandoc format)
+        title = click.prompt("Title")
+        author = click.prompt("Author")
+
+        with click.open_file(os.path.join(BASE_PATH, ".title"), 'w') as title_file:
+            title_file.write(title)
+
+        with click.open_file(os.path.join(BASE_PATH, ".author"), 'w') as author_file:
+            author_file.write(author)
+
+    else:
+        click.echo('Notes repository is initialized already.')
 
 
 @click.command()
@@ -62,12 +73,14 @@ def list_files(startpath, print_files=True):
         level = root.replace(startpath, '').count(os.sep)
         heading = '#' * level
         if level == 1:
-            print("")
-        print('{} {}'.format(heading, os.path.basename(root)))
-        subindent = ' ' * (level + 1)
-        if print_files:
-            for f in files:
-                print('{}{}'.format(subindent, f))
+            pass
+        root_base_name = os.path.basename(root)
+        if '.' not in root_base_name:
+            click.echo('{} {}'.format(heading, root_base_name))
+            subindent = ' ' * (level + 1)
+            if print_files:
+                for f in files:
+                    click.echo('{}{}'.format(subindent, f))
 
 
 @click.command()
@@ -97,7 +110,6 @@ def search(content):
                     click.echo(Fore.MAGENTA + "/".join(abs_path.split('/')[1:-1]) + ": " +
                                Fore.RESET + line.strip())
             search_file.close()
-
 
 cli.add_command(init)
 cli.add_command(clear)
