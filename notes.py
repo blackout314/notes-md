@@ -81,6 +81,8 @@ def edit(title):
     note_path = os.path.join(BASE_PATH, title, "page.md")
     if os.path.exists(note_path):
         click.edit(filename=note_path)
+    else:
+        click.echo("No such title {}".format(title))
 
 
 @click.command()
