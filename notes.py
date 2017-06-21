@@ -2,7 +2,7 @@ import os
 import click
 from datetime import datetime
 
-import slugify as slugify
+from slugify import slugify
 from colorama import Fore, Back, Style
 
 BASE_PATH = '.notes'
@@ -55,15 +55,22 @@ def add(title, content):
     # file_name = "{}.md".format('page')
     file_name = 'page.md'
 
-    title_path = os.path.join(BASE_PATH, title)
+    nested_titles = [t.strip() for t in title.split('/')]
+
+    for i in range(len(nested_titles) + 1):
+        current_path = os.path.join(BASE_PATH, *[slugify(t) for t in nested_titles[:i]])
+        if not os.path.exists(current_path):
+            os.makedirs(current_path)
+            with click.open_file(os.path.join(current_path, '.title'), 'w') as title_file:
+                title_file.write(nested_titles[i - 1])
+
+    title_path = os.path.join(BASE_PATH, *[slugify(t) for t in nested_titles])
     note_file = os.path.join(title_path, file_name)
 
     if not content:
         content = click.edit()
 
     if content:
-        if not os.path.exists(title_path):
-            os.makedirs(title_path)
         with click.open_file(note_file, "a") as new_note:
             new_note.write("\n{}\n".format(content))
 
@@ -76,11 +83,14 @@ def list_files(startpath, print_files=True):
             pass
         root_base_name = os.path.basename(root)
         if '.' not in root_base_name:
-            click.echo('{} {}'.format(heading, root_base_name))
-            subindent = ' ' * (level + 1)
-            if print_files:
-                for f in files:
-                    click.echo('{}{}'.format(subindent, f))
+            with click.open_file(os.path.join(root, '.title'), 'r') as title_file:
+                title = title_file.read()
+                click.echo('{} {}'.format(heading, title))
+                subindent = ' ' * (level + 1)
+                if print_files:
+                    for f in files:
+                        if not f.startswith('.'):
+                            click.echo('{}{}'.format(subindent, f))
 
 
 @click.command()
@@ -104,12 +114,16 @@ def search(content):
     for root, dirs, files in os.walk(BASE_PATH, topdown=False):
         for name in files:
             abs_path = os.path.join(root, name)
-            search_file = open(abs_path, "r")
-            for line in search_file:
-                if content in line:
-                    click.echo(Fore.MAGENTA + "/".join(abs_path.split('/')[1:-1]) + ": " +
-                               Fore.RESET + line.strip())
-            search_file.close()
+            with click.open_file(abs_path, 'r') as search_file:
+                for line in search_file:
+                    if content in line:
+                        click.echo(Fore.MAGENTA + "/".join(abs_path.split('/')[1:-1]) + ": " +
+                                   Fore.RESET + line.strip())
+
+            # @click.command()
+            # def export():
+            # for root, dirs, files in os.walk(BASE_PATH, topdown=False):
+
 
 cli.add_command(init)
 cli.add_command(clear)
@@ -117,6 +131,7 @@ cli.add_command(add)
 cli.add_command(edit)
 cli.add_command(struct)
 cli.add_command(search)
+# cli.add_command(export)
 
 if __name__ == '__main__':
     cli()
