@@ -101,6 +101,9 @@ def struct():
 @click.command()
 @click.argument('title')
 def edit(title):
+
+    title = "/".join([slugify(t.strip()) for t in title.split('/')])
+
     note_path = os.path.join(BASE_PATH, title, "page.md")
     if os.path.exists(note_path):
         click.edit(filename=note_path)
@@ -116,7 +119,7 @@ def search(content):
             abs_path = os.path.join(root, name)
             with click.open_file(abs_path, 'r') as search_file:
                 for line in search_file:
-                    if content in line:
+                    if content.lower() in line.lower():
                         click.echo(Fore.MAGENTA + "/".join(abs_path.split('/')[1:-1]) + ": " +
                                    Fore.RESET + line.strip())
 
