@@ -2,6 +2,7 @@ import os
 import click
 from datetime import datetime
 
+
 from slugify import slugify
 from colorama import Fore, Back, Style
 
@@ -101,7 +102,6 @@ def struct():
 @click.command()
 @click.argument('title')
 def edit(title):
-
     title = "/".join([slugify(t.strip()) for t in title.split('/')])
 
     note_path = os.path.join(BASE_PATH, title, "page.md")
@@ -123,9 +123,25 @@ def search(content):
                         click.echo(Fore.MAGENTA + "/".join(abs_path.split('/')[1:-1]) + ": " +
                                    Fore.RESET + line.strip())
 
-            # @click.command()
-            # def export():
-            # for root, dirs, files in os.walk(BASE_PATH, topdown=False):
+
+@click.command()
+@click.argument('title', default="")
+def read(title):
+    """Read your notes"""
+    if title:
+        click.echo("Read {} notes".format(title))
+
+    for root, dirs, files in os.walk(BASE_PATH, topdown=True):
+
+        for f in files:
+            title_path = os.path.join(root, f)
+            with click.open_file(title_path, 'r') as title_file:
+                content = title_file.read()
+
+            if f == '.title':
+                content = '\n' + '#' * (title_path.count(os.sep) - 1) + ' ' + content
+
+            click.echo(content)
 
 
 cli.add_command(init)
@@ -134,7 +150,7 @@ cli.add_command(add)
 cli.add_command(edit)
 cli.add_command(struct)
 cli.add_command(search)
-# cli.add_command(export)
+cli.add_command(read)
 
 if __name__ == '__main__':
     cli()
