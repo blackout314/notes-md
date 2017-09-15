@@ -2,7 +2,6 @@ import os
 import click
 from datetime import datetime
 
-
 from slugify import slugify
 from colorama import Fore, Back, Style
 
@@ -138,8 +137,9 @@ def read(title):
             with click.open_file(title_path, 'r') as title_file:
                 content = title_file.read()
 
-            if f == '.title':
-                content = '\n' + '#' * (title_path.count(os.sep) - 1) + ' ' + content
+            level = (title_path.count(os.sep) - 1)
+            if level > 0 and f == '.title':
+                content = '\n' + '#' * level + ' ' + content
 
             click.echo(content)
 
